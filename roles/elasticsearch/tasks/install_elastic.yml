@@ -1,0 +1,53 @@
+---  
+- name: Create users and permissions
+  group: 
+    name: elastic
+    state: present
+    
+- user: 
+    name: elastic
+    uid: 100500
+    group: elastic
+
+- name: Copy and install elasticsearch
+
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: elastic
+    group: elastic
+  with_items:
+  - "{{ elastic_home }}"   
+  - "{{ elastic_data }}"   
+  - "{{ elastic_logs }}"   
+   
+- file:
+    src:  "{{ elastic_home }}"
+    dest: /opt/elastic
+    owner: elastic
+    group: elastic
+    state: link
+
+- unarchive:
+    src: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.6.1.tar.gz
+    remote_src: yes
+    owner: elastic
+    group: elastic
+    dest: "{{ elastic_home }}"
+    extra_opts: [--strip-components=1]
+    
+- become_user: elastic
+  template:
+    src: elasticsearch.yml.j2
+    dest: "{{ elastic_home }}/config/elasticsearch.yml"
+    
+- name: Run elasticsearch
+  become_user: elastic
+  vars:
+    path: "/bin/elasticsearch"
+  shell: "export JAVA_HOME={{ java_home }} && nohup {{ elastic_home }}\"{{ path }}\" &"
+
+  
+  
+  

@@ -1,0 +1,12 @@
+---
+
+bucket_name: "mrahalevich"
+vault_token: "s.Gij5OndoXfO7RH2posJC9FYA"
+vault_url: "http://18.130.171.42:8200"
+java_home: "/opt/jdk"
+elastic_home: "/opt/elasticsearch-6.6"
+elastic_data: "/var/elastic/data"
+elastic_logs: "/var/log/elastic_logs"
+elastic_http_port: 19200
+node_name: "elastic01"
+cluster_name: "elastic_cluster"

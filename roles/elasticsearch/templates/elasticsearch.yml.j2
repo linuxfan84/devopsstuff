@@ -1,0 +1,15 @@
+# ---------------------------------- Cluster -----------------------------------
+cluster.name: {{ cluster_name }}
+# ------------------------------------ Node ------------------------------------
+{% if node_name is defined %}
+node.name: {{ node_name }}
+{% endif %}
+# ----------------------------------- Paths ------------------------------------
+path.data: {{ elastic_data }} 
+path.logs: {{ elastic_logs }} 
+# ----------------------------------- Memory -----------------------------------
+bootstrap.memory_lock: false
+# ---------------------------------- Network -----------------------------------
+network.bind_host: "{{ es_bind_host }}"
+http.publish_host: "{{ es_publish_host }}"
+http.port: "{{ elastic_http_port }}"

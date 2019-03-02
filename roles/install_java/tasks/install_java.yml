@@ -1,0 +1,43 @@
+---
+- name: Download and install pip
+  get_url:
+    url: https://bootstrap.pypa.io/get-pip.py
+    dest: /tmp/get-pip.py
+    mode: 0755
+    
+- command: /bin/python /tmp/get-pip.py
+- command: pip install --upgrade --force-reinstall pip==9.0.3
+
+- name: Install pip packages
+  pip:
+    name:
+    - botocore
+    - boto3
+    - hvac
+    
+- set_fact:
+    my_aws_access_key: "{{ lookup('hashi_vault','secret=secret/access_key_id:AWS_ACCESS_KEY_ID token={{ vault_token }} url={{ vault_url }}') }}"
+    my_aws_secret_key: "{{ lookup('hashi_vault','secret=secret/secret_access_key:AWS_SECRET_ACCESS_KEY token={{ vault_token }} url={{ vault_url }}') }}"   
+  
+- name: download java from s3    
+  aws_s3:
+    aws_access_key: "{{ my_aws_access_key }}"
+    aws_secret_key: "{{ my_aws_secret_key }}"
+    bucket: "{{ bucket_name }}"
+    object: /jdk8/jdk-8u202-linux-x64.tar.gz
+    dest: /tmp/jdk-8u202-linux-x64.tar.gz
+    mode: get
+    
+- file:
+    path: "{{ java_home }}"   
+    state: directory
+    
+- name: Unarchive and copy java
+  unarchive:
+    src: /tmp/jdk-8u202-linux-x64.tar.gz
+    dest: "{{ java_home }}" 
+    extra_opts: [--strip-components=1]
+
+
+
+

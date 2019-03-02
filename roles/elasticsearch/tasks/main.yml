@@ -1,0 +1,14 @@
+---
+- name: gather ec2_facts
+  ec2_metadata_facts:
+  tags: ['elasticsearch']
+
+- become_user: root
+  lineinfile:
+    path: "{{ item.0 }}"
+    line: "{{ item.1 }}"  
+  with_together:
+    - ['/etc/security/limits.conf','/etc/sysctl.conf']
+    - ['elastic -  nofile  65536','vm.max_map_count=262144']
+  
+- include: install_elastic.yml
