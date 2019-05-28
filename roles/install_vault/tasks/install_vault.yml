@@ -1,0 +1,86 @@
+#---
+#- name: Download vault binary
+#  unarchive:
+#    src:  "{{ vault_dist }}"
+#    remote_src: yes
+#    dest: /bin/
+#    owner: root
+#    group: root
+#    mode: '0755'
+#
+#- name: Run autocomplete-install for vault
+#  command: /bin/vault -autocomplete-install
+#  register: result
+#  failed_when:
+#    - '"Error executing CLI" not in result.stderr'
+#
+#- name: Create vault-related folders
+#  file: 
+#    path: "{{ item }}"
+#    owner: root
+#    group: root
+#    mode: '0755'
+#    state: directory
+#  loop: 
+#    - /etc/vault.d/
+#
+#
+#- name: Copy vault config template
+#  template:
+#    src: config.j2.hcl
+#    dest: "{{ vault_config }}"
+#    mode: '0644'
+#    force: yes  
+#    
+#- name: Copy vault systemd template
+#  template:
+#    src: vault.service.j2
+#    dest: /etc/systemd/system/vault.service
+#    mode: '0644'
+#    force: yes
+#
+#- name: Run vault through systemctl
+#  command: "{{ item }}"
+#  loop:
+#    - systemctl enable vault.service
+#    - systemctl restart vault.service
+#
+- name: Delete old vault config from consul if exists
+  shell: "consul kv delete -recurse vault/"
+  environment:
+     CONSUL_HTTP_ADDR: http://{{ ansible_default_ipv4.address }}:{{ consul_port }}
+
+- name: Unseal vault and generate keys and token
+  command: vault operator init
+  environment:
+    VAULT_ADDR: http://{{ ansible_default_ipv4.address }}:{{ vault_port }}
+  register: tokens
+  
+- name: Send keys and token on email
+  set_fact:
+    key1: "{{ tokens.stdout | regex_search('(U)+(.*)1:\\s+(.*)') | regex_replace('(U)+(.*)1:+\\s','') }}"
+    key2: "{{ tokens.stdout | regex_search('(U)+(.*)2:\\s+(.*)') | regex_replace('(U)+(.*)2:+\\s','') }}"
+    key3: "{{ tokens.stdout | regex_search('(U)+(.*)3:\\s+(.*)') | regex_replace('(U)+(.*)3:+\\s','') }}"
+    key4: "{{ tokens.stdout | regex_search('(U)+(.*)4:\\s+(.*)') | regex_replace('(U)+(.*)4:+\\s','') }}"
+    key5: "{{ tokens.stdout | regex_search('(U)+(.*)5:\\s+(.*)') | regex_replace('(U)+(.*)5:+\\s','') }}"
+    root_token: "{{ tokens.stdout | regex_search('(I)+(.*)ken:\\s+(.*)') | regex_replace('(I)+(.*)ken:+\\s','') }}"
+- mail:
+    host: "smtp.gmail.com"
+    port: "587"
+    secure: starttls
+    charset: utf-8
+    username: "{{ my_mail }}"
+    password: "{{ lookup('env','MY_GMAIL_PWD') }}"
+    to: "Maksim Rahalevich <{{ my_mail }}>"
+    subject: Vault keys and Token
+    body: |
+      "key1: {{ key1 }}\n 
+      root_token: {{ root_token }}"
+
+- name: send keys and token in Telegram
+  telegram:
+    token: "{{ lookup('env','TELEGRAM_TOKEN') }}"
+    chat_id: "{{ telegramm_user_id }}"
+    msg: "key1: {{ key1 }} and root_token: {{ root_token }}"
+
+

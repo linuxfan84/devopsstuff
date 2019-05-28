@@ -1,6 +1,6 @@
  provider "vault" {
-   address = "http://18.130.171.42:8200"
-   token = "s.Gij5OndoXfO7RH2posJC9FYA"
+   address = ""
+   token = ""
  }
  
  data "vault_generic_secret" "secret_access_key" {

@@ -1,0 +1,20 @@
+{
+    "bootstrap_expect": 1,
+    "client_addr": "127.0.0.1",
+    "bind_addr": "127.0.0.1",
+    "server": true,
+    "datacenter": "dc1",
+    "data_dir": "/var/consul/data",
+    "log_level": "INFO",
+    "enable_syslog": true,
+    "ui": true,
+    "encrypt": "{{ consul_keygen_key.stdout }}",
+    "ca_file": "{{ ssl_dir }}/ca.cert",
+    "cert_file": "{{ ssl_dir }}/consul.cert",
+    "key_file": "{{ ssl_dir }}/consul.key",
+    "verify_incoming": true,
+    "verify_outgoing": true,
+    "connect": {
+    "enabled": true
+    }
+}

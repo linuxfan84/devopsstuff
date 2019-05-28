@@ -1,0 +1,12 @@
+[Unit]
+Description=Consul server 
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/consul agent -config-dir "{{ consul_config_dir }}"
+TimeoutStartSec=0
+
+
+[Install]
+WantedBy=multi-user.target

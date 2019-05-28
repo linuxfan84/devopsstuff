@@ -1,7 +1,7 @@
 ---
-# tasks file for install_hashi_vault
+# tasks file for install_vault
 
 - include: install_vault.yml
-
+  become: yes
   tags:
     - vault

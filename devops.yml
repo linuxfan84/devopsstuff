@@ -1,13 +1,7 @@
 ---
-- hosts: elasticsearch 
-  become: yes
-  become_user: root 
+- hosts: elasticsearch
+
   roles:
   
-#TODO: Install Hashi Vault on elastichost in prod mode
-#and make it available from other hosts
-
-# - install_hashi_vault
   - install_java
   - elasticsearch
-

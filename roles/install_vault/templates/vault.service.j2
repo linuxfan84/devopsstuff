@@ -1,0 +1,12 @@
+[Unit]
+Description=Vault server 
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/vault server -config={{ vault_config }}
+TimeoutStartSec=0
+
+
+[Install]
+WantedBy=multi-user.target

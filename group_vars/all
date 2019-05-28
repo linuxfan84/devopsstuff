@@ -1,8 +1,26 @@
 ---
-
+# Common vars
+my_mail: "rogalmaks@gmail.com"
 bucket_name: "mrahalevich"
-vault_token: "s.Gij5OndoXfO7RH2posJC9FYA"
-vault_url: "http://18.130.171.42:8200"
+
+# SSL vars
+ca_dir: "/etc/consul.d/ssl/CA"
+ssl_dir: "/etc/consul.d/ssl"
+
+# Vault vars
+vault_dist: "https://releases.hashicorp.com/vault/1.1.2/vault_1.1.2_linux_amd64.zip"
+vault_config: "/etc/vault.d/config.hcl"
+vault_addr: "172.31.31.183"
+vault_port: "8200"
+
+# Consul vars
+consul_dist: "https://releases.hashicorp.com/consul/1.5.0/consul_1.5.0_linux_amd64.zip"
+consul_addr: "172.31.31.183"
+consul_port: "8500"
+consul_config: "/etc/consul.d/server/config.json"
+consul_config_dir: "/etc/consul.d"
+
+# Elastic vars
 java_home: "/opt/jdk"
 elastic_home: "/opt/elasticsearch-6.6"
 elastic_data: "/var/elastic/data"
@@ -10,3 +28,6 @@ elastic_logs: "/var/log/elastic_logs"
 elastic_http_port: 19200
 node_name: "elastic01"
 cluster_name: "elastic_cluster"
+
+#Telegramm settings:
+telegramm_user_id: "209516321"

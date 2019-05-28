@@ -10,7 +10,6 @@
     group: elastic
 
 - name: Copy and install elasticsearch
-
   file:
     path: "{{ item }}"
     state: directory
