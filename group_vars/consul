@@ -1,0 +1,6 @@
+# All consul vars
+consul_dist: "https://releases.hashicorp.com/consul/1.5.0/consul_1.5.0_linux_amd64.zip"
+consul_addr: "172.31.31.183"
+consul_port: "8500"
+consul_config: "/etc/consul.d/server/config.json"
+consul_config_dir: "/etc/consul.d"

@@ -2,5 +2,5 @@ terraform.tfstate
 .terraform
 terraform.tfstate.backup
 venv
-testinstance.tf__
-variables.tf__
+*.tf
+*.tf__

@@ -1,6 +1,6 @@
 ---
 - hosts: localhost
-
+  connection: local
 #TODO: 
 #1     Install consul for vault storage backend  DONE
 #1.1   Configure consul for vault backend        DONE
@@ -9,6 +9,5 @@
 #2.1   Add https/tls support for all consul/vault communications
 
   roles:
-   - install_consul
-#  - install_vault
+   - terraform_configs
 #  - install_terraform

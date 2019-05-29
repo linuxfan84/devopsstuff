@@ -1,5 +1,9 @@
 ---
 # Common vars
+counter: '5'
+mode: ""
+aws_region: "eu-west-2"
+aws_instance_type: "t2.micro"
 my_mail: "rogalmaks@gmail.com"
 bucket_name: "mrahalevich"
 
@@ -12,13 +16,6 @@ vault_dist: "https://releases.hashicorp.com/vault/1.1.2/vault_1.1.2_linux_amd64.
 vault_config: "/etc/vault.d/config.hcl"
 vault_addr: "172.31.31.183"
 vault_port: "8200"
-
-# Consul vars
-consul_dist: "https://releases.hashicorp.com/consul/1.5.0/consul_1.5.0_linux_amd64.zip"
-consul_addr: "172.31.31.183"
-consul_port: "8500"
-consul_config: "/etc/consul.d/server/config.json"
-consul_config_dir: "/etc/consul.d"
 
 # Elastic vars
 java_home: "/opt/jdk"

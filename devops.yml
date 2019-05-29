@@ -1,7 +1,8 @@
 ---
-- hosts: elasticsearch
+- hosts: all
 
   roles:
-  
+  - install_consul
+  - install_vault    
   - install_java
   - elasticsearch

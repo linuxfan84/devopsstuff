@@ -1,0 +1,9 @@
+---
+- name: Generate terraform configs using var count provided in command line
+  debug: msg="Need to run with -e "counter=N" where N is a number of Consul hosts"
+
+  
+- template:
+    src: "terraform.j2.templates.tf"
+    dest: "~/devopsstuff/consul_instances.tf"
+    mode: '0644'
