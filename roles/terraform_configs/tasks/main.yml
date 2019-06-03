@@ -4,6 +4,11 @@
 
   
 - template:
-    src: "terraform.j2.templates.tf"
-    dest: "~/devopsstuff/consul_instances.tf"
+    src: "{{ item.template }}"
+    dest: "{{ item.dest }}"
     mode: '0644'
+  loop:
+  - { template: "ec2.j2.template.tf" , dest: "/home/git/devopsstuff/ec2_instances.tf" }
+# - { template: "vpc.j2.template.tf" , dest: "/home/git/devopsstuff/vpc.tf" }
+  tags:
+  - terra_configs

@@ -1,0 +1,66 @@
+- name: Create SSL-related dirs and files
+  file:
+    state: "{{ item.types }}"
+    path: "{{ item.ssl_dirs }}"
+    mode: "{{ item.ssl_modes }}"
+  loop:
+   - { types: "directory" , ssl_dirs: "{{ ssl_dir }}" , ssl_modes: '0755' }
+   - { types: "directory" , ssl_dirs: "{{ ca_dir }}" , ssl_modes: '0755' }
+   - { types: "touch" , ssl_dirs: "{{ ca_dir }}/serial" , ssl_modes: '0755' }
+   - { types: "touch" , ssl_dirs: "{{ ca_dir }}/certindex" , ssl_modes: '0755' }
+  
+- shell: echo "000a" > "{{ ca_dir }}/serial"
+
+- template:
+    src: "{{ item.template }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { template: "root-csr.j2.conf", dest: "{{ ca_dir }}/root-csr.conf" }
+    - { template: "wild-csr.j2.conf", dest: "{{ ca_dir }}/wild-csr.conf" }
+    - { template: "myca.j2.conf", dest: "{{ ca_dir }}/myca.conf" }
+    
+- name: Create a Self-Signed Root Certificate
+  command: | 
+    openssl req -x509 -newkey rsa:2048 \
+    -days 3650 -nodes \
+    -out "{{ ca_dir }}/ca.cert" \
+    -keyout "{{ ca_dir }}/privkey.pem" \
+    -config "{{ ca_dir }}/root-csr.conf"
+
+- name: Create a Wildcard Certificate Signing Request
+  command: | 
+    openssl req -newkey rsa:2048 \
+    -nodes \
+    -out "{{ ca_dir }}/consul.csr" \
+    -keyout "{{ ca_dir }}/consul.key" \
+    -config "{{ ca_dir }}/wild-csr.conf"
+    
+- name: Sign the Certificate Signing Request to Generate a Certificate
+  command: | 
+    openssl ca -batch \
+    -notext -in "{{ ca_dir }}/consul.csr" \
+    -out "{{ ca_dir }}/consul.cert" \
+    -config "{{ ca_dir }}/myca.conf"
+
+- name: Copy all files to ssl_dir
+  become: yes
+  become_user: root
+  copy:
+    src: "{{ ca_dir }}/{{ item }}"
+    dest: "{{ ssl_dir }}"
+  loop:
+    - ca.cert
+    - consul.cert
+    - consul.key
+    
+- name: Remove certs and keys from ssl_dir
+  become: yes
+  become_user: root  
+  file:
+    state: absent
+    path: "{{ ca_dir }}/{{ item }}"
+  loop:
+    - ca.cert
+    - consul.cert
+    - consul.key 

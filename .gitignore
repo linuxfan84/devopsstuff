@@ -4,3 +4,5 @@ terraform.tfstate.backup
 venv
 *.tf
 *.tf__
+test.yml
+test2.yml

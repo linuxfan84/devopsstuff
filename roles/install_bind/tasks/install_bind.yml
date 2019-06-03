@@ -1,0 +1,59 @@
+---
+- name: Install necessary packages and libs
+  yum:
+    name: "{{ item }}"
+  loop:
+    - bind 
+    - bind-utils 
+  delegate_to: "{{ groups['consul'][0] }}"
+  run_once: true
+
+- name: Setup primary DNS server 
+  template:
+    src: bind.j2.conf
+    dest: /etc/named.conf
+    mode: '0640'
+  delegate_to: "{{ groups['consul'][0] }}"
+  run_once: true
+
+- name: Setup forward and reverse DNS zone   
+  template:
+    src: "{{ item.template }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: named
+    mode: '0640'
+  loop:
+  - { template: "forward.j2.rahalevich.zone" , dest: "/var/named/forward.rahalevich.zone" }
+  - { template: "reverse.j2.rahalevich.zone" , dest: "/var/named/reverse.rahalevich.zone" }
+  delegate_to: "{{ groups['consul'][0] }}"
+  run_once: true
+
+  
+- name: Enable and restart bind
+  command: "{{ item }}"
+  loop:
+    - systemctl enable named.service
+    - systemctl restart named.service
+  delegate_to: "{{ groups['consul'][0] }}"
+  run_once: true    
+
+- name: Add DNS details in network config and resolv.conf file
+  vars:
+    dns_str: "{{ hostvars[groups['consul'][0]]['ansible_eth0']['ipv4']['address'] }}" 
+  lineinfile: 
+    state: present
+    path: "/etc/{{ item.conf }}"
+    regexp: "{{ item.reg }}"
+    line: "{{ item.str}}"
+  loop:
+  - { conf: "sysconfig/network-scripts/ifcfg-eth0" , reg: "^DNS=(.*)$" , str: "DNS={{ dns_str }}" }
+  - { conf: "resolv.conf" , reg: "^nameserver+(.*)$" , str: "nameserver {{ dns_str }}" }
+
+- shell: chattr +i /etc/resolv.conf 
+- command: /etc/init.d/network restart
+    
+    
+    
+    
+    

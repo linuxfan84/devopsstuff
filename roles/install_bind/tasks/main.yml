@@ -1,0 +1,6 @@
+---
+- name: Install dns server Bind
+  include: install_bind.yml
+  become: yes
+  tags:
+    - bind 

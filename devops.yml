@@ -1,8 +1,10 @@
 ---
-- hosts: all
+- hosts: consul 
 
   roles:
+
   - install_consul
+  - install_bind
   - install_vault    
   - install_java
   - elasticsearch

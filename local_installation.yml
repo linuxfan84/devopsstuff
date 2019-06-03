@@ -9,5 +9,6 @@
 #2.1   Add https/tls support for all consul/vault communications
 
   roles:
-   - terraform_configs
-#  - install_terraform
+  - install_consul
+  - terraform_configs
+  - install_terraform

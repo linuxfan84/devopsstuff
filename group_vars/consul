@@ -1,6 +1,12 @@
 # All consul vars
+fact_caching_timeout: "3600"
+ansible_ssh_port: "22022"
+ansible_private_key_file: "/home/git/max"
+ansible_ssh_user: "centos"
 consul_dist: "https://releases.hashicorp.com/consul/1.5.0/consul_1.5.0_linux_amd64.zip"
-consul_addr: "172.31.31.183"
+consul_addr: "{{ ansible_default_ipv4.address }}"
 consul_port: "8500"
 consul_config: "/etc/consul.d/server/config.json"
 consul_config_dir: "/etc/consul.d"
+#
+ansible_python_interpreter: "/usr/bin/python2.7"
