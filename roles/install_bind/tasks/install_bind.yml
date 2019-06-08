@@ -38,22 +38,39 @@
   delegate_to: "{{ groups['consul'][0] }}"
   run_once: true    
 
+- shell: chattr -i /etc/resolv.conf
+
+
 - name: Add DNS details in network config and resolv.conf file
   vars:
     dns_str: "{{ hostvars[groups['consul'][0]]['ansible_eth0']['ipv4']['address'] }}" 
-  lineinfile: 
+  lineinfile:
     state: present
     path: "/etc/{{ item.conf }}"
     regexp: "{{ item.reg }}"
     line: "{{ item.str}}"
   loop:
   - { conf: "sysconfig/network-scripts/ifcfg-eth0" , reg: "^DNS=(.*)$" , str: "DNS={{ dns_str }}" }
-  - { conf: "resolv.conf" , reg: "^nameserver+(.*)$" , str: "nameserver {{ dns_str }}" }
+  - { conf: "resolv.conf" , reg: "^nameserver(.*)+(8\\.){3}(.*)+$" , str: "nameserver 8.8.8.8" }
+  - { conf: "resolv.conf" , reg: "^nameserver(.*)+(172\\.)(.*)+$" , str: "nameserver {{ dns_str }}" }
+  - { conf: "resolv.conf" , reg: "^search(.*)+{{ my_dns_domain }}(.*)+$" , str: "search  {{ my_dns_domain }}" }
 
-- shell: chattr +i /etc/resolv.conf 
-- command: /etc/init.d/network restart
+
+- shell: chattr +i /etc/resolv.conf
+
+
     
-    
+
+  
+
+  
+ 
+  
+
+  
+
+
+
     
     
     

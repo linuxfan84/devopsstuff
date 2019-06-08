@@ -9,6 +9,7 @@
     mode: '0644'
   loop:
   - { template: "ec2.j2.template.tf" , dest: "/home/git/devopsstuff/ec2_instances.tf" }
-# - { template: "vpc.j2.template.tf" , dest: "/home/git/devopsstuff/vpc.tf" }
+  - { template: "assume_role_policy.j2.json" , dest: "/home/git/devopsstuff/assume_role_policy.json" }
+  - { template: "consul_policy.j2.json"  , dest: "/home/git/devopsstuff/consul_policy.json" }
   tags:
   - terra_configs

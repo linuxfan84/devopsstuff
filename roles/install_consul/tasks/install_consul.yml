@@ -1,56 +1,96 @@
 ---
-
-- name: Download Consul binary
-  unarchive:
-    src:  "{{ consul_dist }}"
-    remote_src: yes
-    dest: /bin/
-    owner: root
-    group: root
-    mode: '0755'
+#- name: Stop all consul agents and kill processes
+#  systemd:
+#    name: consul
+#    state: stopped
+#
+#- name: Delete old files and dirs (if exists)
+#  file:
+#    state: absent
+#    path: "{{ item }}"
+#  loop:
+#    - "{{ ssl_dir }}"
+#    - "{{ ca_dir }}"
+#    - "/etc/consul.d"
+#    - "/var/consul/data"
+#  
+#- name: Download Consul binary
+#  unarchive:
+#    src:  "{{ consul_dist }}"
+#    remote_src: yes
+#    dest: /bin/
+#    owner: root
+#    group: root
+#    mode: '0755'
+#    
+#- name: Run autocomplete-install for consul
+#  command: /bin/consul -autocomplete-install
+#  register: result
+#  failed_when:
+#    - '"Error executing CLI" not in result.stderr'
+# 
+#- name: Create consul-related folders
+#  file: 
+#    path: "{{ item }}"
+#    owner: root
+#    group: root
+#    mode: '0755'
+#    state: directory
+#  loop: 
+#    - /etc/consul.d
+#    - /var/consul/data
+#
+#- name: Create consul-related hostvars 
+#  file:
+#    path:  "{{ github_folder }}/host_vars"
+#    state: "directory"
+#    owner: git
+#    group: wheel
+#    mode: '0755'
+#  delegate_to: localhost
+#  run_once: true
     
-- name: Run autocomplete-install for consul
-  command: /bin/consul -autocomplete-install
-  register: result
-  failed_when:
-    - '"Error executing CLI" not in result.stderr'
- 
-- name: Create consul-related folders
-  file: 
-    path: "{{ item }}"
-    owner: root
-    group: root
-    mode: '0755'
-    state: directory
-  loop: 
-    - /etc/consul.d
-    - /var/consul/data
+#- file:    
+#    path:  "{{ github_folder }}/host_vars/{{ item }}"
+#    state: "touch"
+#    owner: git
+#    group: wheel
+#    mode: '0640'
+#  loop: 
+#  - "{{ hostvars[inventory_hostname]['inventory_hostname'] }}"
+#  delegate_to: localhost
 
+  
+#- lineinfile:
+#    path: "{{ github_folder }}/host_vars/{{ item }}"
+#    regexp: "^consul_agent_mode(.*)$"
+#    line: "consul_agent_mode: \"\" " 
+#  loop:
+#  - "{{ hostvars[inventory_hostname]['inventory_hostname'] }}"    
+#  delegate_to: localhost  
+
+  
+#- pause:
+#    prompt: "Fill files inside host_vars directory and press Shift+c , Enter"
+#    echo: no
+  
 - name: Create Consul encrypt key
   command: consul keygen
   register: consul_keygen_key
   run_once: true
-  
+ 
 - name: Copy consul config template
   template:
     src: config.j2.json
     dest: /etc/consul.d/config.json
     mode: '0755'
-  
+ 
 - name: Copy consul systemd template
   template:
     src: consul.service.j2
     dest: /etc/systemd/system/consul.service
     mode: '0644'
     force: yes
-
-- name: Delete old files and dirs (if exists)
-  file:
-    state: absent
-    path: "{{ item }}"
-  loop:
-    - "{{ ssl_dir }}"
-    - "{{ ca_dir }}"
 
 - name: Run consul through systemctl
   systemd:

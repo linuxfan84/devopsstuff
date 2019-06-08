@@ -1,14 +1,18 @@
 {
     "node_meta": {
     "date_and_time": "{{ ansible_date_time.time }}"
-    }
+    },
+    "retry_join": ["provider=aws tag_key=Name tag_value=consul"],
+    "bind_addr": "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses | join() }}", 
+    {% set item = hostvars[inventory_hostname]['consul_agent_mode'] %}
+    {%- if item == "server" %}"{{ item }}": true,
     "bootstrap_expect": 3,
+    {% else %}{% endif %} 
     "client_addr": "127.0.0.1",
-    "bind_addr": "127.0.0.1",
- 
-    "client": true,
+    "retry_join": ["provider=aws tag_key=Name tag_value=consul"],
     "datacenter": "dc1",
     "data_dir": "/var/consul/data",
+    "enable_script_checks": true,
     "log_level": "INFO",
     "enable_syslog": true,
     "ui": true,

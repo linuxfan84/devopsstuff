@@ -1,19 +1,19 @@
 ; "Generated in {{ ansible_date_time.date }} {{ ansible_date_time.time }}"
 $TTL 86400
-@   IN  SOA         consul1.rahalevich.com. root.rahalevich.com. (
+@   IN  SOA         {{ hostvars[inventory_hostname].ansible_nodename }}.{{ my_dns_domain }}. root.{{ my_dns_domain }}. (
         2011071001  ;Serial
         3600        ;Refresh
         1800        ;Retry
         604800      ;Expire
         86400       ;Minimum TTL
 )
-@       IN  NS          consul1.rahalevich.com.
-@       IN  PTR         rahalevich.com.
+@       IN  NS          {{ hostvars[inventory_hostname].ansible_nodename }}.{{ my_dns_domain }}.
+@       IN  PTR         {{ my_dns_domain }}.
 
 {% for group in groups['consul'] %}
-consul{{ loop.index }}  IN  A  {{ hostvars[group]['ansible_default_ipv4']['address'] }}
+{{ hostvars[group].ansible_nodename }}  IN  A  {{ hostvars[group]['ansible_default_ipv4']['address'] }}
 {% endfor %}
 
 {% for group in groups['consul'] %}
-{{ hostvars[group]['ansible_default_ipv4']['address'].split(".")[3] }} IN  PTR consul{{ loop.index }}.rahalevich.com.
+{{ hostvars[group]['ansible_default_ipv4']['address'].split(".")[3] }} IN  PTR {{ hostvars[group].ansible_nodename }}.{{ my_dns_domain }}.
 {% endfor %}

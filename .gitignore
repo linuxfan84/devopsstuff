@@ -2,7 +2,6 @@ terraform.tfstate
 .terraform
 terraform.tfstate.backup
 venv
-*.tf
-*.tf__
 test.yml
-test2.yml
+consul_policy.json
+assume_role_policy.json
