@@ -6,7 +6,7 @@
     "bind_addr": "{{ hostvars[inventory_hostname].ansible_all_ipv4_addresses | join() }}", 
     {% set item = hostvars[inventory_hostname]['consul_agent_mode'] %}
     {%- if item == "server" %}"{{ item }}": true,
-    "bootstrap_expect": 3,
+    "bootstrap_expect": 1,
     {% else %}{% endif %} 
     "client_addr": "127.0.0.1",
     "retry_join": ["provider=aws tag_key=Name tag_value=consul"],
@@ -17,6 +17,11 @@
     "enable_syslog": true,
     "ui": true,
     "encrypt": "{{ consul_keygen_key.stdout }}",
+    "acl": {
+    "enabled": true,
+    "default_policy": "deny",
+    "enable_token_persistence": true
+    },
     "connect": {
     "enabled": true
     }

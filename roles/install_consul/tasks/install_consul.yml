@@ -1,78 +1,88 @@
 ---
-#- name: Stop all consul agents and kill processes
-#  systemd:
-#    name: consul
-#    state: stopped
-#
-#- name: Delete old files and dirs (if exists)
-#  file:
-#    state: absent
-#    path: "{{ item }}"
-#  loop:
-#    - "{{ ssl_dir }}"
-#    - "{{ ca_dir }}"
-#    - "/etc/consul.d"
-#    - "/var/consul/data"
-#  
-#- name: Download Consul binary
-#  unarchive:
-#    src:  "{{ consul_dist }}"
-#    remote_src: yes
-#    dest: /bin/
-#    owner: root
-#    group: root
-#    mode: '0755'
-#    
-#- name: Run autocomplete-install for consul
-#  command: /bin/consul -autocomplete-install
-#  register: result
-#  failed_when:
-#    - '"Error executing CLI" not in result.stderr'
-# 
-#- name: Create consul-related folders
-#  file: 
-#    path: "{{ item }}"
-#    owner: root
-#    group: root
-#    mode: '0755'
-#    state: directory
-#  loop: 
-#    - /etc/consul.d
-#    - /var/consul/data
-#
-#- name: Create consul-related hostvars 
-#  file:
-#    path:  "{{ github_folder }}/host_vars"
-#    state: "directory"
-#    owner: git
-#    group: wheel
-#    mode: '0755'
-#  delegate_to: localhost
-#  run_once: true
+- name: Change ssh settings
+  lineinfile:
+    path: "/etc/ssh/sshd_config"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}" 
+  loop:
+  - { regexp: "^ClientAliveInterval(.*)+$" , line: "ClientAliveInterval 120" }  
+  - { regexp: "^ClientAliveCountMax(.*)+$" , line: "ClientAliveCountMax 720" }
+
+ 
+- name: Stop all consul agents and kill processes
+  systemd:
+    name: consul
+    state: stopped
+
+- name: Delete old files and dirs (if exists)
+  file:
+    state: absent
+    path: "{{ item }}"
+  loop:
+    - "{{ ssl_dir }}"
+    - "{{ ca_dir }}"
+    - "/etc/consul.d"
+    - "/var/consul/data"
+  
+- name: Download Consul binary
+  unarchive:
+    src:  "{{ consul_dist }}"
+    remote_src: yes
+    dest: /bin/
+    owner: root
+    group: root
+    mode: '0755'
     
-#- file:    
-#    path:  "{{ github_folder }}/host_vars/{{ item }}"
-#    state: "touch"
-#    owner: git
-#    group: wheel
-#    mode: '0640'
-#  loop: 
-#  - "{{ hostvars[inventory_hostname]['inventory_hostname'] }}"
-#  delegate_to: localhost
+- name: Run autocomplete-install for consul
+  command: /bin/consul -autocomplete-install
+  register: result
+  failed_when:
+    - '"Error executing CLI" not in result.stderr'
+ 
+- name: Create consul-related folders
+  file: 
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+  loop: 
+    - /etc/consul.d
+    - /var/consul/data
 
-  
-#- lineinfile:
-#    path: "{{ github_folder }}/host_vars/{{ item }}"
-#    regexp: "^consul_agent_mode(.*)$"
-#    line: "consul_agent_mode: \"\" " 
-#  loop:
-#  - "{{ hostvars[inventory_hostname]['inventory_hostname'] }}"    
-#  delegate_to: localhost  
+- name: Create consul-related hostvars 
+  file:
+    path:  "{{ github_folder }}/host_vars"
+    state: "directory"
+    owner: git
+    group: wheel
+    mode: '0755'
+  delegate_to: localhost
+  run_once: true
+   
+- file:    
+    path:  "{{ github_folder }}/host_vars/{{ item }}"
+    state: "touch"
+    owner: git
+    group: wheel
+    mode: '0640'
+  loop: 
+  - "{{ hostvars[inventory_hostname]['inventory_hostname'] }}"
+  delegate_to: localhost
 
-  
-#- pause:
-#    prompt: "Fill files inside host_vars directory and press Shift+c , Enter"
-#    echo: no
+ 
+- lineinfile:
+    path: "{{ github_folder }}/host_vars/{{ item }}"
+    regexp: "^consul_agent_mode(.*)$"
+    line: "consul_agent_mode: \"\" " 
+  loop:
+  - "{{ hostvars[inventory_hostname]['inventory_hostname'] }}"    
+  delegate_to: localhost  
+
+ 
+- pause:
+    prompt: "Fill files inside host_vars directory and press Shift+c , Enter"
+    echo: no
   
 - name: Create Consul encrypt key
   command: consul keygen
@@ -96,7 +106,10 @@
   systemd:
     state: restarted
     daemon_reload: yes
-    name: consul
+    name: "{{ item }}"
+  loop:
+  - consul
+  - sshd
 
 
 

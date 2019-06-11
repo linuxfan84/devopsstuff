@@ -1,4 +1,4 @@
-# "Generated in 2019-06-08 14:58:46"
+# "Generated in 2019-06-11 11:57:45"
 
 provider "aws" {
   region     = "eu-central-1"
@@ -83,93 +83,6 @@ resource "aws_instance" "consul2" {
   key_name = "max"
   subnet_id = "subnet-8fc59ac2"
   private_ip = "172.31.1.2"
-  iam_instance_profile = "${aws_iam_instance_profile.consul_profile.name}"
-  ebs_block_device {
-    device_name = "/dev/sda1"
-    delete_on_termination = "true"
-  }
-
-  tags = {
-    Name = "consul"
-  }
-}
-
-
-data "template_cloudinit_config" "userdata3" {
-  part {
-  content = <<EOF
-  #cloud-config
-  hostname: consul3
-  fqdn: consul3
-  EOF
-  }
-}
-
-resource "aws_instance" "consul3" {
-  user_data = "${data.template_cloudinit_config.userdata3.rendered}"
-  ami           = "ami-0804ba1c58cd2e8e2"
-  instance_type = "t2.micro"
-  key_name = "max"
-  subnet_id = "subnet-8fc59ac2"
-  private_ip = "172.31.1.3"
-  iam_instance_profile = "${aws_iam_instance_profile.consul_profile.name}"
-  ebs_block_device {
-    device_name = "/dev/sda1"
-    delete_on_termination = "true"
-  }
-
-  tags = {
-    Name = "consul"
-  }
-}
-
-
-data "template_cloudinit_config" "userdata4" {
-  part {
-  content = <<EOF
-  #cloud-config
-  hostname: consul4
-  fqdn: consul4
-  EOF
-  }
-}
-
-resource "aws_instance" "consul4" {
-  user_data = "${data.template_cloudinit_config.userdata4.rendered}"
-  ami           = "ami-0804ba1c58cd2e8e2"
-  instance_type = "t2.micro"
-  key_name = "max"
-  subnet_id = "subnet-8fc59ac2"
-  private_ip = "172.31.1.4"
-  iam_instance_profile = "${aws_iam_instance_profile.consul_profile.name}"
-  ebs_block_device {
-    device_name = "/dev/sda1"
-    delete_on_termination = "true"
-  }
-
-  tags = {
-    Name = "consul"
-  }
-}
-
-
-data "template_cloudinit_config" "userdata5" {
-  part {
-  content = <<EOF
-  #cloud-config
-  hostname: consul5
-  fqdn: consul5
-  EOF
-  }
-}
-
-resource "aws_instance" "consul5" {
-  user_data = "${data.template_cloudinit_config.userdata5.rendered}"
-  ami           = "ami-0804ba1c58cd2e8e2"
-  instance_type = "t2.micro"
-  key_name = "max"
-  subnet_id = "subnet-8fc59ac2"
-  private_ip = "172.31.1.5"
   iam_instance_profile = "${aws_iam_instance_profile.consul_profile.name}"
   ebs_block_device {
     device_name = "/dev/sda1"

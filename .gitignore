@@ -5,3 +5,4 @@ venv
 test.yml
 consul_policy.json
 assume_role_policy.json
+host_vars

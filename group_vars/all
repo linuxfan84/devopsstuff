@@ -8,7 +8,7 @@ consul_config_dir: "/etc/consul.d"
 # Common vars
 my_dns_domain: "rahalevich.com"
 github_folder: "/home/git/devopsstuff"
-counter: '6'
+counter: '3'
 mode: ""
 aws_region: "eu-central-1"
 availability_zone: "eu-central-1a"
