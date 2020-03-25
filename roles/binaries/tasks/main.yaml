@@ -1,19 +1,19 @@
-- name: Download and install cfssl on control plane node
-  become: yes
-  vars:
-    cfssl_binary: [ "cfssl","cfssljson" ] 
-  get_url:
-    url: https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/{{ cfssl_arch }}/{{ item }}
-    dest: "/usr/local/bin/"
-    mode: 0755
-  loop: "{{ cfssl_binary|flatten(levels=1) }}" 
-  when: inventory_hostname == "controller-0"
-
-#- name: Include kubectl-related variables 
+#- name: Download and install cfssl on control plane node
 #  become: yes
-#  include_vars:
-#    file: all.yaml
-#
+#  vars:
+#    cfssl_binary: [ "cfssl","cfssljson" ] 
+#  get_url:
+#    url: https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/{{ cfssl_arch }}/{{ item }}
+#    dest: "/usr/local/bin/"
+#    mode: 0755
+#  loop: "{{ cfssl_binary|flatten(levels=1) }}" 
+#  when: inventory_hostname == "controller-0"
+
+- name: Include kubectl-related variables 
+  become: yes
+  include_vars:
+    file: all.yaml
+
 #- name: Download kubectl
 #  get_url:
 #    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubectl_version }}/bin/darwin/amd64/kubectl"
@@ -22,28 +22,109 @@
 #  delegate_to: localhost
 #  run_once: true
 #
-#- name: Download and install etcd on control plane nodes
-#  become: yes
-#  file:
-#    path: {{ item }}
-#    state: directory
-#    mode: 0755
-#  with_items:
-#    - /etc/etcd
-#    - /var/lib/etcd
+#- name: Install k8s control plane components
+#  block:
 #
-#- get_url:
-#    url: "https://github.com/etcd-io/etcd/releases/download/v{{ etcd_version }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
-#    dest: "/usr/local/bin/"
-#    mode: 0755
+#    - name: Create etcd-related folders
+#      vars:
+#        etcd_folders: [ "/etc/etcd", "/var/lib/etcd" ]
+#      become: yes
+#      file:
+#        path: "{{ item }}"
+#        state: directory 
+#        mode: 0755
+#      loop: "{{ etcd_folders|flatten(levels=1) }}"
 #
+#    - name: Create temp etcd folder
+#      file:
+#        path: "{{ home_dir }}/etcd_temp" 
+#        state: directory
+#        mode: 0755
 #
+#    - name: Download etcd 
+#      get_url:
+#        url: https://github.com/etcd-io/etcd/releases/download/v{{ etcd_version }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz
+#        dest: "{{ home_dir }}/etcd_temp/"
+#        mode: 0755
 #
-#tar -xvf etcd-v3.4.0-linux-amd64.tar.gz --warning=no-unknown-keyword
-#sudo mv etcd-v3.4.0-linux-amd64/etcd* /usr/local/bin/
-#sudo mkdir -p /etc/etcd /var/lib/etcd
+#    - name: Unarchive etcd 
+#      unarchive:
+#        remote_src: yes
+#        src: "{{ home_dir }}/etcd_temp/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
+#        dest: "{{ home_dir }}/etcd_temp/"
+#        extra_opts:
+#          - --warning=no-unknown-keyword
 #
+#    - name: Install etcd
+#      vars:
+#        etcd_files: [ "etcd", "etcdctl" ] 
+#      become: yes 
+#      copy:
+#        remote_src: yes
+#        src: "{{ home_dir }}/etcd_temp/etcd-v{{ etcd_version }}-linux-amd64/{{ item }}"
+#        dest: /usr/local/bin/
+#        mode: 0755
+#      loop: "{{ etcd_files|flatten(levels=1) }}"
+#
+#    - name: Install kube-apiserver,controller-manager,scheduler components
+#      become: yes
+#      get_url:
+#        url: https://storage.googleapis.com/kubernetes-release/release/v{{ kube_components_version }}/bin/linux/amd64/{{ item }}
+#        dest: /usr/local/bin/
+#        mode: 0755
+#      loop: "{{ kube_components|flatten(levels=1) }}"
+#
+#  when: inventory_hostname in controller_nodes
 
-#- debug:
-#    msg: "{{ kubectl_version }}"
+- name: Install k8s components on worker nodes
+  block:
+    - name: Install container runtime binaries and network plugins
+      TODO: Create temp folder and unarchive
+      vars:
+        container_cni_binaries: 
+          - "https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.15.0/crictl-v1.15.0-linux-amd64.tar.gz"
+          - "https://github.com/opencontainers/runc/releases/download/v1.0.0-rc8/runc.amd64"
+          - "https://github.com/containernetworking/plugins/releases/download/v0.8.2/cni-plugins-linux-amd64-v0.8.2.tgz"
+          - "https://github.com/containerd/containerd/releases/download/v1.2.9/containerd-1.2.9.linux-amd64.tar.gz"
+      get_url:
+        url: "{{ item }}"
+        dest: /usr/local/bin/
+        mode: 0755
+      loop: "{{ container_cni_binaries|flatten(levels=1) }}"
+
+    - name: Install k8s binaries
+      vars:
+        k8s_worker_binaries:
+          - "kube-proxy"
+          - "kubelet"
+      get_url:
+        url: https://storage.googleapis.com/kubernetes-release/release/v{{ kube_components_version }}/bin/linux/amd64/{{ item }}
+        dest: /usr/local/bin/
+        mode: 0755
+      loop: "{{ k8s_worker_binaries|flatten(levels=1) }}"
+
+
+
+
+  become: yes
+  when: inventory_hostname in worker_nodes
+  
+
+ TODO: Clear all temp folders after installation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

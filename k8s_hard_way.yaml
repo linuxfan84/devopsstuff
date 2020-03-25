@@ -1,6 +1,6 @@
 - hosts: all 
   roles:
-#  - binaries
-  - certs
+  - binaries
+#  - certs
 # - configs
   

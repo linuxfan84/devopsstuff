@@ -55,11 +55,4 @@ worker_certs: [ "ca.pem", "worker-0-key.pem", "worker-1-key.pem", "worker-2-key.
 .pem" ]
 controller_certs: [ "ca.pem", "ca-key.pem", "kubernetes-key.pem", "kubernetes.pem", "service-account-key.pem", "service-account.pem" ]
 cfssl_templates: [ "ca-config.json", "ca-csr.json", "admin-csr.json", "worker-0-csr.json", "worker-1-csr.json", "worker-2-csr.json", "kube-controller-manager-csr.json", "kube-proxy-csr.json", "kube-scheduler-csr.json", "kubernetes-csr.json", "service-account-csr.json" ]
-
-
-
-
-
-
-
-
+home_dir: "/home/maksimrahalevich"

@@ -1,2 +1,3 @@
 kubectl_version: "1.17.0"
+kube_components_version: "1.17.0"
 etcd_version: "3.4.0"
