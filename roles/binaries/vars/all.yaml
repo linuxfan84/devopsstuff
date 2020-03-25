@@ -1,0 +1,2 @@
+kubectl_version: "1.17.0"
+etcd_version: "3.4.0"

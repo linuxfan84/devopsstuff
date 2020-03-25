@@ -1,0 +1,8 @@
+- name: Generate config files for kubelet authentication
+
+#  debug:
+#    msg: "{{ k8s_public_address }}"
+
+  shell: >
+         
+  

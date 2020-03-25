@@ -6,3 +6,11 @@ test.yml
 consul_policy.json
 assume_role_policy.json
 host_vars
+creds.json
+gce.ini
+main.tf
+venv
+ansible.cfg
+test.yaml
+temp_folder
+.DS_Store

@@ -1,0 +1,49 @@
+- name: Download and install cfssl on control plane node
+  become: yes
+  vars:
+    cfssl_binary: [ "cfssl","cfssljson" ] 
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/{{ cfssl_arch }}/{{ item }}
+    dest: "/usr/local/bin/"
+    mode: 0755
+  loop: "{{ cfssl_binary|flatten(levels=1) }}" 
+  when: inventory_hostname == "controller-0"
+
+#- name: Include kubectl-related variables 
+#  become: yes
+#  include_vars:
+#    file: all.yaml
+#
+#- name: Download kubectl
+#  get_url:
+#    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubectl_version }}/bin/darwin/amd64/kubectl"
+#    dest: "/usr/local/bin/"
+#    mode: 0755
+#  delegate_to: localhost
+#  run_once: true
+#
+#- name: Download and install etcd on control plane nodes
+#  become: yes
+#  file:
+#    path: {{ item }}
+#    state: directory
+#    mode: 0755
+#  with_items:
+#    - /etc/etcd
+#    - /var/lib/etcd
+#
+#- get_url:
+#    url: "https://github.com/etcd-io/etcd/releases/download/v{{ etcd_version }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
+#    dest: "/usr/local/bin/"
+#    mode: 0755
+#
+#
+#
+#tar -xvf etcd-v3.4.0-linux-amd64.tar.gz --warning=no-unknown-keyword
+#sudo mv etcd-v3.4.0-linux-amd64/etcd* /usr/local/bin/
+#sudo mkdir -p /etc/etcd /var/lib/etcd
+#
+
+#- debug:
+#    msg: "{{ kubectl_version }}"
+

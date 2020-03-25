@@ -1,0 +1,65 @@
+---
+consul_dist: "https://releases.hashicorp.com/consul/1.5.0/consul_1.5.0_linux_amd64.zip"
+consul_addr: "{{ ansible_default_ipv4.address }}"
+consul_port: "8500"
+consul_config: "/etc/consul.d/server/config.json"
+consul_config_dir: "/etc/consul.d"
+
+# Common vars
+my_dns_domain: "rahalevich.com"
+github_folder: "/home/git/devopsstuff"
+counter: '3'
+mode: ""
+aws_region: "eu-central-1"
+availability_zone: "eu-central-1a"
+aws_instance_type: "t2.micro"
+my_mail: "rogalmaks@gmail.com"
+bucket_name: "mrahalevich"
+
+# SSL vars
+ca_dir: "/etc/consul.d/ssl/CA"
+ssl_dir: "/etc/consul.d/ssl"
+
+# Vault vars
+vault_dist: "https://releases.hashicorp.com/vault/1.1.2/vault_1.1.2_linux_amd64.zip"
+vault_config: "/etc/vault.d/config.hcl"
+vault_addr: "172.31.31.183"
+vault_port: "8200"
+
+# Elastic vars
+java_home: "/opt/jdk"
+elastic_home: "/opt/elasticsearch-6.6"
+elastic_data: "/var/elastic/data"
+elastic_logs: "/var/log/elastic_logs"
+elastic_http_port: 19200
+node_name: "elastic01"
+cluster_name: "elastic_cluster"
+
+# Telegramm settings:
+telegramm_user_id: "209516321"
+
+# Kubernetes vars
+cfssl_owner: "root"
+cfssl_group: "root"
+cfssl_bin_directory: "/usr/local/bin/"
+cfssl_arch: "linux"
+worker_nodes: "{{ groups.tag_worker }}"
+controller_nodes: "{{ groups.tag_controller }}"
+gcp_zone: "europe-west3-a"
+gcp_project: "noted-sandbox-271617"
+gcp_creds: "~/ansible/creds.json"
+gcp_region: "europe-west3"
+kube_components: [ "kube-controller-manager", "kube-proxy", "kube-scheduler" ]
+kube_hostnames: "kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster,kubernetes.svc.cluster.local"
+worker_certs: [ "ca.pem", "worker-0-key.pem", "worker-1-key.pem", "worker-2-key.pem", "worker-0.pem", "worker-1.pem", "worker-2
+.pem" ]
+controller_certs: [ "ca.pem", "ca-key.pem", "kubernetes-key.pem", "kubernetes.pem", "service-account-key.pem", "service-account.pem" ]
+cfssl_templates: [ "ca-config.json", "ca-csr.json", "admin-csr.json", "worker-0-csr.json", "worker-1-csr.json", "worker-2-csr.json", "kube-controller-manager-csr.json", "kube-proxy-csr.json", "kube-scheduler-csr.json", "kubernetes-csr.json", "service-account-csr.json" ]
+
+
+
+
+
+
+
+
