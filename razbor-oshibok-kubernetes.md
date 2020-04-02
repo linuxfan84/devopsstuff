@@ -4,7 +4,7 @@ description: >-
   кластера k8s
 ---
 
-# Разбор ошибок Kubernetes
+# Kubernetes errors
 
 **Как исправить "Failed to get system container stats for /system.slice/kubelet.service"**  
 Добавляем в `/etc/sysconfig/kubelet`:  
