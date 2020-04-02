@@ -11,6 +11,6 @@
 
 ## Kubernetes
 
-* [Разбор ошибок Kubernetes](kubernetes/razbor-oshibok-kubernetes.md)
+* [Kubernetes errors and troubleshooting](kubernetes/razbor-oshibok-kubernetes.md)
 * [Kubernetes answers and questions](kubernetes/untitled.md)
 

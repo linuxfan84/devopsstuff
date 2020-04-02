@@ -1,4 +1,4 @@
-# Разбор ошибок Kubernetes
+# Kubernetes errors and troubleshooting
 
 **Как исправить "Failed to get system container stats for /system.slice/kubelet.service"**  
  Добавляем в `/etc/sysconfig/kubelet`:  
