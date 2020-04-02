@@ -1,7 +1,6 @@
 # Table of contents
 
 * [Introduction](README.md)
-* [Kubernetes документация v1.17](kubernetes-dokumentaciya-v1.17.md)
 
 ## Ansible
 
