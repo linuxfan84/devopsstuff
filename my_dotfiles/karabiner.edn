@@ -1,0 +1,47 @@
+{                       ;; mandatory opening and closing braces
+                        ;; C  | left_command
+                        ;; T  | left_control
+                        ;; O  | left_option
+                        ;; S  | left_shift
+                        ;; F  | fn
+                        ;; Q  | right_command
+                        ;; W  | right_control
+                        ;; E  | right_option
+                        ;; R  | right_shift
+
+:profiles {             ;; profiles
+    :my_profile {       ;; name of my profile
+         :default true  ;; set my_profile as default profile
+         :sim     200   ;; simultaneous_threshold_milliseconds
+                        ;; keys need to be pressed within this threshold to be considered simultaneous
+         :delay   500   ;; to_delayed_action_delay_milliseconds
+                        ;; basically it means time after which the key press is count delayed
+         :alone   500   ;; to_if_alone_timeout_milliseconds
+                        ;; hold for 495ms and single tap registered
+                        ;; hold for 505ms and seen as modifier
+         :held    2000  ;; to_if_held_down_threshold_milliseconds
+                        ;; 995 ms is considered as hold like "a", 1005 considered as we want
+                        ;; to type many leters like 'aaaaa...'
+             }
+          }
+
+;:layers {           ;; layers are basically "hyper" keys
+; :caps-mode {:key :caps_lock :alone {:key :escape}}}
+
+:simlayers {        
+                    ;; press this in combination with something else and depending on your rule,
+                    ;; make things happen
+ :s-mode {:key :s}  ;; s key will be hyper-key
+ :a-mode {:key :a}  ;; a key will be hyper-key
+
+           }
+
+:main [{:des "s key - navigation I J K L"
+  :rules [:s-mode
+    [:j :left_arrow]
+    [:l :right_arrow]
+    [:i :up_arrow]
+    [:k :down_arrow]]}
+
+       {:des "a key - switch lang"
+  :rules [[[:caps_locks :a] :!Ospacebar]]}]}
