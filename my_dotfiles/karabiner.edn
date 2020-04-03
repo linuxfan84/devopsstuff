@@ -8,6 +8,10 @@
                         ;; W  | right_control
                         ;; E  | right_option
                         ;; R  | right_shift
+:input-sources {
+ :us {:input_mode_id ""
+      :input_source_id "com.apple.keylayout.US"
+      :language "en"}}
 
 :profiles {             ;; profiles
     :my_profile {       ;; name of my profile
@@ -16,10 +20,10 @@
                         ;; keys need to be pressed within this threshold to be considered simultaneous
          :delay   500   ;; to_delayed_action_delay_milliseconds
                         ;; basically it means time after which the key press is count delayed
-         :alone   500   ;; to_if_alone_timeout_milliseconds
+         :alone   1000  ;; to_if_alone_timeout_milliseconds
                         ;; hold for 495ms and single tap registered
                         ;; hold for 505ms and seen as modifier
-         :held    2000  ;; to_if_held_down_threshold_milliseconds
+         :held    5000  ;; to_if_held_down_threshold_milliseconds
                         ;; 995 ms is considered as hold like "a", 1005 considered as we want
                         ;; to type many leters like 'aaaaa...'
              }
@@ -31,17 +35,39 @@
 :simlayers {        
                     ;; press this in combination with something else and depending on your rule,
                     ;; make things happen
- :s-mode {:key :s}  ;; s key will be hyper-key
- :a-mode {:key :a}  ;; a key will be hyper-key
-
+ :f-mode {:key :f}  ;; s key will be hyper-key
+ :j-mode {:key :j}  
            }
 
-:main [{:des "s key - navigation I J K L"
-  :rules [:s-mode
+:main [{:des "s key - navigation"
+                    ;; here is vim-like navigation but using inverted T IJKL keys
+                    ;; also ; using for delete or backspace
+  :rules [:f-mode
     [:j :left_arrow]
     [:l :right_arrow]
     [:i :up_arrow]
-    [:k :down_arrow]]}
+    [:k :down_arrow]
+    [:k :down_arrow]
+    [:semicolon :delete_or_backspace]]}
 
-       {:des "a key - switch lang"
-  :rules [[[:caps_locks :a] :!Ospacebar]]}]}
+       {:des "caps-mode"
+                    ;; this rule is for switching language (hot key in properties is ctrl - space)
+  :rules [[[:caps_lock :a] :!Ospacebar]]}
+
+       {:des "j key"
+                    ;; this rule is for all symbols like "'/\| ... etc
+  :rules [:j-mode
+    [:q :!Sopen_bracket]   ;; "{" symbol
+    [:w :!Sclose_bracket]  ;; "}" or "Ъ" symbol
+    [:e :comma :us]        ;; "," symbol 
+    [:r :period :us]       ;; "." symbol
+    [:a :!Sslash]          ;; "?" symbol      
+    [:s :slash]            ;; "/" symbol
+    [:d :backslash]        ;; "\" or "ё" symbol
+    [:f :!Sbackslash]      ;; "|" or "ё" symbol 
+    [:z :open_bracket]     ;; "[" symbol
+    [:x :close_bracket]    ;; "]" symbol
+    [:c :quote]            ;; "'" symbol
+    [:v :!Squote]          ;; """ symbol
+    [:g :return_or_enter]  ;; """ symbol
+    ]}]}
