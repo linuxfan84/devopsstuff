@@ -104,3 +104,14 @@ description: Здесь я пишу свои заметки о изучении 
 **Что такое cfssl?**  
  Cloudflare SSL \(cfssl\) утилита для работы с ssl сертификатами. Использует json формат и довольно проще чем openssl.
 
+**В чем разница между Replication Controller и Replica Set.**  
+RS требует наличие поля  selector. Это поле позволяет RS  управлять подами, которые не были созданы как часть RS. Например, любые поды созданные с  
+labels, которые совпадают с matchLabels будут управляться при помощи RS. Это могут быть поды созданные вручную при помощи RC, и тд.  
+Увеличение количества подов можно сделать тремя способами:  
+1\) Обновить файл манифеста и вызвать kubectl replace -f &lt;file\_name.yaml&gt;  
+2\) kubectl scale replicas=N -f &lt;file\_name.yaml&gt;  Это автоматически обновит файл манифеста  
+3\) kubectl scale replicas=N replicaset &lt;rs\_name&gt;
+
+  
+****
+
