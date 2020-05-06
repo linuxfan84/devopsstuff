@@ -1,6 +1,3 @@
 ---
-description: Наверное вести заметки лучше здесь
+description: Пизда фляге
 ---
-
-# Introduction
-
