@@ -110,7 +110,14 @@ labels, которые совпадают с matchLabels будут управл
 Увеличение количества подов можно сделать тремя способами:  
 1\) Обновить файл манифеста и вызвать kubectl replace -f &lt;file\_name.yaml&gt;  
 2\) kubectl scale replicas=N -f &lt;file\_name.yaml&gt;  Это автоматически обновит файл манифеста  
-3\) kubectl scale replicas=N replicaset &lt;rs\_name&gt;
+3\) kubectl scale replicas=N replicaset &lt;rs\_name&gt; Это обновит число подов в RS, но не обновит файл манифеста
+
+**Taints и tolerations, что это вообще такое?**  
+Taint это свойство ноды. Оно означает что на ней могут планироваться поды, которые имеют toleration к этой ноде. TODO: описать подробно
+
+**Что такое Node selector и в чем его отличие от labels**
+
+ **Что такое node affinity/antiaffinity**
 
   
 ****

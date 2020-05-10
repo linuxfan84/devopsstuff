@@ -8,7 +8,7 @@ description: >-
 
 ### **1.Установка k8s в GCP \(Google Cloud Platform\)**
 
-\*\*\*\*За основу взят гайд [kubernetes-the-hard-way](https://github.com/kelseyhightower/kubernetes-the-hard-way) для версии 1.15.3 переработанный под версию 1.17.  
+\*\*\*\*За основу взят гайд [kubernetes-the-hard-way](https://github.com/kelseyhightower/kubernetes-the-hard-way) для версии 1.15.3 переработанный под версию 1.18.  
  OS - Centos 7.7  
  Создаем проект в GCP.  
  Имя проекта - kuberhard  
@@ -397,7 +397,7 @@ kubectl config set-cluster kubernetes-the-hard-way \
     --kubeconfig=kube-proxy.kubeconfig
 
   kubectl config set-credentials system:kube-proxy \
-    --client-certificate=kube-proxy.pem \
+    --client-certificate=  kube-proxy.pem \
     --client-key=kube-proxy-key.pem \
     --embed-certs=true \
     --kubeconfig=kube-proxy.kubeconfig
@@ -513,7 +513,7 @@ done
 ```
 
 Изначальная генерация \(bootstrapping\) etcd кластера:  
- Используя комманды tmux выше, создаем 3 панели и синхронно вводим в них следующие комманды:
+Используя комманды tmux выше, создаем 3 панели и синхронно вводим в них следующие комманды:
 
 ```text
 wget -q --show-progress --https-only --timestamping "https://github.com/etcd-io/etcd/releases/download/v3.4.0/etcd-v3.4.0-linux-amd64.tar.gz"
