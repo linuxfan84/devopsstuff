@@ -8,6 +8,7 @@
 
 ## Kubernetes
 
+* [kubectl cheat sheet](kubernetes/kubectl-cheat-sheet.md)
 * [Kubernetes errors and troubleshooting](kubernetes/razbor-oshibok-kubernetes.md)
 * [Kubernetes answers and questions](kubernetes/untitled.md)
 * [Kubernetes practice](kubernetes/kubernetes-practice.md)
