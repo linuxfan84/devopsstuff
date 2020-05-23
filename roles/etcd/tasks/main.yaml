@@ -1,0 +1,27 @@
+- name: Bootstrap etcd cluster
+  block:
+    - name: Copy necessary keys to etcd directory
+      become: yes
+      copy:
+        src: /Users/maksimrahalevich/ansible/temp_folder/{{ item }}  
+        dest: /etc/etcd/{{ item }}
+      loop: "{{ [ [ controller_certs[0] ] + [ controller_certs[4] ] + [ controller_certs[5] ] ]|flatten(levels=1) }}"
+    
+    - name: Copy etcd.service template
+      become: yes
+      template:
+        src: etcd.service.j2 
+        dest: /etc/systemd/system/etcd.service
+        owner: root
+        group: root 
+        mode: 0644
+
+    - name: Reload systemd
+      become: yes
+      systemd:
+        name: etcd
+        enabled: yes
+        state: restarted
+        daemon_reload: yes
+
+  when: inventory_hostname in controller_nodes 

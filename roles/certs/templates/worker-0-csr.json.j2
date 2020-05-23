@@ -12,5 +12,12 @@
       "OU": "Kubernetes The Hard Way",
       "ST": "Minsk"
     }
+  ],
+
+  "hosts": [
+    "{{ gcp_instance_facts|json_query('resources[3:6].networkInterfaces[].networkIP')|join('",\n    "') }}",
+    "{{gcp_instance_facts|json_query('resources[3:6].networkInterfaces[].accessConfigs[].natIP')|join('",\n    "') }}",
+    "{{ gcp_instance_facts|json_query('resources[3:6].name')|join('",\n    "') }}"
   ]
+
 }

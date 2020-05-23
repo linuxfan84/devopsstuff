@@ -1,6 +1,15 @@
-- hosts: all 
+- hosts: all
+  gather_facts: yes
   roles:
+    
   - binaries
-#  - certs
-# - configs
+  - certs
+  - configs
+  - etcd
+  - control_plane
+  - lb
+  - rbac
+  - worker_nodes
+  - coredns 
   
+# - cleanup (delete old certs and related folders)

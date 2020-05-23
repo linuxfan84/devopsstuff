@@ -1,0 +1,99 @@
+- name: Bootstrap control plane
+  block:
+    - name: Download kubernetes binaries
+      get_url:
+        url: https://dl.k8s.io/v1.18.0/kubernetes-server-linux-amd64.tar.gz
+        dest: /tmp/kubernetes-server.tar.gz
+        mode: 0755
+
+    - name: Unarchive kubernetes binaries
+      unarchive:
+        remote_src: yes
+        src: /tmp/kubernetes-server.tar.gz
+        dest: /tmp/
+
+    - name: Copy kubernetes binaries
+      become: yes
+      copy:
+        remote_src: yes
+        src: /tmp/kubernetes/server/bin/{{ item }}
+        dest: /usr/local/bin/
+        mode: '0755'
+      loop: 
+      - kube-apiserver
+      - kube-controller-manager
+      - kube-scheduler
+      - kubectl 
+    
+    - name: Create folder for control plane certs
+      become: yes
+      file:
+        path: "{{ item }}"
+        owner: root
+        group: root
+        mode: '0644'
+        state: directory
+      loop: 
+      - /var/lib/kubernetes
+      - /etc/kubernetes/config
+
+
+    - name: Move certs to necessary folder
+      become: yes   
+      copy:
+        src: "{{ home_dir }}/certs/{{ item }}"
+        dest: /var/lib/kubernetes/{{ item }}
+        remote_src: yes
+      loop:
+        - ca.pem
+        - ca-key.pem 
+        - kubernetes-key.pem
+        - kubernetes.pem
+        - service-account-key.pem
+        - service-account.pem
+        - encryption-config.yaml  
+
+    - name: Move kube-* kubeconfigs to necessary folder
+      become: yes   
+      copy:
+        remote_src: yes
+        src: "{{ home_dir }}/{{ item }}"
+        dest: /var/lib/kubernetes/{{ item }}
+      loop:
+        - kube-controller-manager.kubeconfig
+        - kube-scheduler.kubeconfig
+
+    - name: Copy kube-* service templates
+      become: yes
+      template:
+        src: "{{ item.service }}"
+        dest: /etc/systemd/system/{{ item.dest }}
+        owner: root
+        group: root
+        mode: 0644
+      loop:
+        - { service: 'kube-controller-manager.service.j2', dest: 'kube-controller-manager.service' }
+        - { service: 'kube-scheduler.service.j2', dest: 'kube-scheduler.service' }
+        - { service: 'kube-apiserver.service.j2', dest: 'kube-apiserver.service' }
+
+    - name: Copy kube-scheduller config
+      become: yes
+      template:
+        src: kube-scheduler.yaml.j2 
+        dest: /etc/kubernetes/config/kube-scheduler.yaml
+        owner: root
+        group: root
+
+    - name: Reload kube-* systemd services
+      become: yes
+      systemd:
+        name: "{{ item }}"
+        enabled: yes
+        state: restarted
+        daemon_reload: yes
+      loop:
+      - kube-controller-manager
+      - kube-scheduler
+      - kube-apiserver
+
+  when: inventory_hostname in controller_nodes

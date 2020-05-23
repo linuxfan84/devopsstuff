@@ -1,8 +1,152 @@
-- name: Generate config files for kubelet authentication
+- name: Include GCP facts gathering role
+  include_role:
+    name: gcp_facts
 
-#  debug:
-#    msg: "{{ k8s_public_address }}"
-
-  shell: >
-         
+- name: Generate config files for authentication
+  block:
+    - name:  Set cluster for kubelet
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config set-cluster kubernetes-the-hard-way
+             --certificate-authority=ca.pem --embed-certs=true
+             --server=https://{{ k8s_public_address|join('') }}:6443
+             --kubeconfig={{ item }}.kubeconfig
+      loop: "{{ worker_nodes|flatten(levels=1) }}"
   
+    - name:  Set credentials for kubelet
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config set-credentials system:node:{{ item }}
+             --client-certificate={{ item }}.pem
+             --client-key={{ item }}-key.pem
+             --embed-certs=true --kubeconfig={{ item }}.kubeconfig
+      loop: "{{ worker_nodes|flatten(levels=1) }}"
+  
+    - name:  Set context for kubelet
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config set-context default
+             --cluster=kubernetes-the-hard-way
+             --user=system:node:{{ item }}
+             --kubeconfig={{ item }}.kubeconfig
+      loop: "{{ worker_nodes|flatten(levels=1) }}"
+  
+    - name:  Use context for kubelet
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config use-context default
+             --kubeconfig={{ item |join('')}}.kubeconfig
+      loop: "{{ worker_nodes|flatten(levels=1) }}"
+  
+  
+    - name:  Set Cluster for admin user,kube-controller-manager,kube-scheduller
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config set-cluster kubernetes-the-hard-way
+             --certificate-authority=ca.pem --embed-certs=true
+             --server=https://127.0.0.1:6443
+             --kubeconfig={{ item|join('') }}.kubeconfig
+      loop: "{{ controlplane_components }}"
+  
+    - name:  Set credentials for admin user,kube-controller-manager,kube-scheduller
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config set-credentials system:{{ item }}
+             --client-certificate={{ item }}.pem
+             --client-key={{ item }}-key.pem
+             --embed-certs=true
+             --kubeconfig={{ item|join('') }}.kubeconfig
+      loop: "{{ controlplane_components }}"
+  
+    - name:  Set context for admin user,kube-controller-manager,kube-scheduller 
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config set-context default
+             --cluster=kubernetes-the-hard-way
+             --user=system:{{ item }}
+             --kubeconfig={{ item }}.kubeconfig
+      loop: "{{ controlplane_components }}"
+      
+    - name:  Use context for admin user,kube-controller-manager,kube-scheduller 
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config use-context default
+             --kubeconfig={{ item }}.kubeconfig
+      loop: "{{ controlplane_components }}"
+
+    - name:  Set Cluster for kube proxy
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config set-cluster kubernetes-the-hard-way
+             --certificate-authority=ca.pem --embed-certs=true
+             --server=https://{{ k8s_public_address|join('') }}:6443
+             --kubeconfig=kube-proxy.kubeconfig
+  
+    - name:  Set credentials for kube proxy 
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config set-credentials system:kube-proxy
+             --client-certificate=kube-proxy.pem
+             --client-key=kube-proxy-key.pem
+             --embed-certs=true
+             --kubeconfig=kube-proxy.kubeconfig
+  
+    - name:  Set context for kube proxy 
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config set-context default
+             --cluster=kubernetes-the-hard-way
+             --user=system:kube-proxy
+             --kubeconfig=kube-proxy.kubeconfig
+      
+    - name:  Use context for kube proxy 
+      shell: >
+             cd ~/ansible/temp_folder &&
+             kubectl config use-context default
+             --kubeconfig=kube-proxy.kubeconfig
+  delegate_to: localhost
+  run_once: true
+
+- name: Distribute configs between worker nodes
+  block:
+    - name: kubelet configs
+      copy:
+        src: "/Users/maksimrahalevich/ansible/temp_folder/{{ inventory_hostname }}.kubeconfig"
+        dest: "{{ item }}"
+        mode: '0775'
+      loop:
+        - /home/maksimrahalevich/
+        - /var/lib/kubelet/kubeconfig
+  
+    - name: kube-proxy configs
+      copy:
+        src: /Users/maksimrahalevich/ansible/temp_folder/kube-proxy.kubeconfig
+        dest: "{{ item }}"
+        mode: '0775'
+      loop:
+        - /home/maksimrahalevich/
+        - /var/lib/kube-proxy/kubeconfig
+  become: yes
+  when: inventory_hostname in worker_nodes
+
+- name: Distribute configs between controller nodes
+  block:
+    - name: kube-* components configs
+      copy:
+        src: /Users/maksimrahalevich/ansible/temp_folder/{{ item }}.kubeconfig
+        dest: ~/
+      loop: "{{ controlplane_components }}"
+  when: inventory_hostname in controller_nodes
+
+- name: Create encryption key 
+  shell: >
+         head -c 32 /dev/urandom | base64
+  register: encrypt_key
+  delegate_to: localhost
+  run_once: true
+
+- name: Create and distribute encryption config
+  template:
+    src: encryption-config.yaml.j2
+    dest: ~/certs/encryption-config.yaml
+  when: inventory_hostname in controller_nodes 

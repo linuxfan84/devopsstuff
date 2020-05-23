@@ -1,0 +1,16 @@
+- hosts: all
+  connection: local
+  gather_facts: no
+  roles:
+    - gcp_facts
+  vars:
+    host_ip: "{{ gcp_instance_facts|json_query('resources[3:6].networkInterfaces[].networkIP') }}"
+    nat_ip:  "{{gcp_instance_facts|json_query('resources[3:6].networkInterfaces[].accessConfigs[].natIP') }}"
+    hosts_names: "{{ gcp_instance_facts|json_query('resources[3:6].name') }}"
+  tasks:
+    - debug:
+        msg: "{{ item.0 }}, {{ item.1 }}, {{ item.2 }}"  
+      loop: "{{ host_ip|zip(nat_ip,hosts_names)|list }}"
+      delegate_to: controller-0
+      run_once: true
+

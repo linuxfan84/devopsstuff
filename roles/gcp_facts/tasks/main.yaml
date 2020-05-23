@@ -1,0 +1,31 @@
+- name: Gather GCP facts
+  block:
+    - gcp_compute_instance_info:
+        zone: "{{ gcp_zone }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ gcp_creds }}"
+      register: gcp_instance_facts
+
+    - gcp_compute_address_info:
+        region: "{{ gcp_region }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ gcp_creds }}"
+      register: gcp_network_facts
+
+    - set_fact:
+        k8s_public_address: "{{ gcp_network_facts | json_query(query) }}"
+      vars:
+        query: 'resources[?name==`kubernetes-the-hard-way`].address'
+
+  delegate_to: "localhost"
+  run_once: true
+
+- name: Gather controller nodes internal ip's
+  set_fact:
+    controller_private_addresses: "{{ gcp_instance_facts | json_query(query) }}"
+  vars:
+    query: 'resources[*].networkInterfaces[0].networkIP'
+
+

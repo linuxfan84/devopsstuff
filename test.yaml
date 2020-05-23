@@ -1,0 +1,11 @@
+- hosts: all 
+  connection: local
+  gather_facts: yes 
+  tasks:
+    - template:
+        src: "~/ansible/test_templ.j2"
+        dest: "~/ansible/test_templ"
+        mode: 0755
+      when: inventory_hostname == 'worker-1'
+    #    - debug:
+    #        msg: "{{ inventory_hostname|replace(\"worker-\", \"\") }}"

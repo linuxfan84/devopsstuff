@@ -1,0 +1,43 @@
+- name: Include GCP facts gathering role
+  include_role:
+    name: gcp_facts
+
+- name: Create directory
+  become: yes
+  file:
+    name: /run/systemd/resolve/ 
+    state: directory
+
+- name: Create symlink to /etc/resolv.conf
+  become: yes
+  file:
+    src: /etc/resolv.conf
+    dest: /run/systemd/resolve/resolv.conf
+    state: link
+
+
+- name: Configure kubectl on controller node
+  shell: >
+         cd ~/ansible/temp_folder &&
+         kubectl config set-cluster kubernetes-the-hard-way
+         --certificate-authority=ca.pem --embed-certs=true
+         --server=https://"{{ k8s_public_address|join('') }}:6443" &&
+         kubectl config set-credentials admin --client-certificate=admin.pem --client-key=admin-key.pem &&
+         kubectl config set-context kubernetes-the-hard-way --cluster=kubernetes-the-hard-way --user=admin &&
+         kubectl config use-context kubernetes-the-hard-way
+  delegate_to: localhost
+  run_once: true
+
+- name: Install CoreDNS
+  block: 
+    - name: Download CoreDNS
+      get_url:
+         url: https://storage.googleapis.com/kubernetes-the-hard-way/coredns.yaml
+         dest: ~/ansible/temp_folder/
+         mode: '0755'
+
+    - name: Apply CoreDNS
+      shell: kubectl apply -f ~/ansible/temp_folder/coredns.yaml && kubectl get pods -l k8s-app=kube-dns -n kube-system 
+  delegate_to: localhost
+  run_once: true
+

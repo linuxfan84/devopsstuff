@@ -1,32 +1,13 @@
-- name: Gather GCP facts
-  block:
-    - gcp_compute_instance_info:
-        zone: "{{ gcp_zone }}"
-        project: "{{ gcp_project }}"
-        auth_kind: serviceaccount
-        service_account_file: "{{ gcp_creds }}"
-      register: gcp_instance_facts
-
-    - gcp_compute_address_info:
-        region: "{{ gcp_region }}"
-        project: "{{ gcp_project }}"
-        auth_kind: serviceaccount
-        service_account_file: "{{ gcp_creds }}"
-      register: gcp_network_facts  
-
-    - set_fact:
-        k8s_public_address: "{{ gcp_network_facts | json_query(query) }}"
-      vars:
-        query: 'resources[?name==`kubernetes-the-hard-way`].address'
-  delegate_to: "localhost"
-  run_once: true
+- name: Include GCP facts gathering role
+  include_role:
+    name: gcp_facts
 
 - name: Create folder for certificates on all hosts
   file:
     path: ~/certs/
     mode: '0755'
     state: directory
-
+   
 - name: Copy all cfssl configuration templates
   template:
     src: "{{ item }}.j2"
@@ -49,19 +30,6 @@
               -profile=kubernetes
               /tmp/admin-csr.json | cfssljson -bare admin
 
-    - name: Generate kubelet cert and private key
-      shell:  >
-              cd ~/certs/ && cfssl gencert -ca=ca.pem        
-              -ca-key=ca-key.pem -config=/tmp/ca-config.json
-              -hostname="{{ item }},
-              {{ gcp_instance_facts.resources[index].networkInterfaces[0].accessConfigs[0].natIP }},
-              {{ gcp_instance_facts.resources[0].networkInterfaces[0].networkIP }}"
-              -profile=kubernetes
-              /tmp/{{ item }}-csr.json | cfssljson -bare {{ item }}
-
-      loop: "{{ worker_nodes|flatten(levels=1) }}"
-      loop_control:
-        index_var: index
 
     - name: Generate kube* managers certs and private keys
       shell:  >
@@ -76,11 +44,7 @@
       shell:  >
               cd ~/certs/ && cfssl gencert -ca=ca.pem
               -ca-key=ca-key.pem -config=/tmp/ca-config.json
-              -hostname="10.32.0.1,10.240.0.10,10.240.0.11,10.240.0.12,
-              {{ k8s_public_address|join('') }},127.0.0.1,
-              {{ kube_hostnames }}" 
-              -profile=kubernetes
-              /tmp/kubernetes-csr.json | 
+              -profile=kubernetes /tmp/kubernetes-csr.json | 
               cfssljson -bare kubernetes
 
     - name: Generate Service Account cert and private key
@@ -92,33 +56,72 @@
               cfssljson -bare service-account
   when: inventory_hostname == "controller-0" 
 
-- name: Distribute certs between worker nodes
-  file:
-    path: ~/ansible/temp_folder
-    mode: '0755'
-    state: directory
-  delegate_to: localhost
-  run_once: true
+          #          -hostname="{{ item.0 }},{{ item.1 }},{{ item.2 }}"
+- name: Generate kubelet cert and private key
+  vars:
+    host_ip: "{{ gcp_instance_facts|json_query('resources[3:6].networkInterfaces[].networkIP') }}"
+    nat_ip:  "{{gcp_instance_facts|json_query('resources[3:6].networkInterfaces[].accessConfigs[].natIP') }}"
+    host_names: "{{ gcp_instance_facts|json_query('resources[3:6].name') }}"
 
-- fetch:
-    flat: yes
-    src: ~/certs/{{ item }}
-    dest: ~/ansible/temp_folder/
-  when: inventory_hostname == "controller-0"
-  with_items: "{{ worker_certs }}"
-
-- copy:
-    src: /Users/maksimrahalevich/ansible/temp_folder/{{ item }}.pem
-    dest: ~/certs/{{ item }}.pem
-  when: inventory_hostname == item
-  with_items: "{{ groups.tag_worker }}" 
+  shell:  >
+          cd ~/certs/ && cfssl gencert -ca=ca.pem 
+          -ca-key=ca-key.pem -config=/tmp/ca-config.json
+          -profile=kubernetes
+          /tmp/{{ item.2 }}-csr.json | cfssljson -bare {{ item.2 }}
+  loop: "{{ host_ip|zip(nat_ip,host_names)|list }}"
+  when: inventory_hostname == "controller-0" 
   
-- copy:
-    src: /Users/maksimrahalevich/ansible/temp_folder/{{ item }}-key.pem
-    dest: ~/certs/{{ item }}-key.pem
-  when: inventory_hostname == item
-  with_items: "{{ groups.tag_worker }}"
+- name: Distribute certs between worker nodes
+  block:
+  - name: Create certs folder
+    file:
+      path: ~/ansible/temp_folder
+      mode: '0755'
+      state: directory
+    delegate_to: localhost
+    run_once: true
 
+  - name: Download certs from controller-0 to temp_folder
+    fetch:
+      flat: yes
+      src: ~/certs/{{ item }}
+      dest: ~/ansible/temp_folder/
+    loop: "{{ worker_certs|flatten(levels=1) }}"
+    when: inventory_hostname == "controller-0"
+
+  - name: Copy worker certs from temp_folder to worker nodes 
+    copy:
+      src: /Users/maksimrahalevich/ansible/temp_folder/{{ item }}.pem
+      dest: ~/certs/{{ item }}.pem
+    loop: "{{ worker_nodes|flatten(levels=1) }}" 
+    when: inventory_hostname == item
+
+  - name: Copy ca cert from temp_folder to worker nodes
+    copy:
+      src: /Users/maksimrahalevich/ansible/temp_folder/ca.pem
+      dest: ~/certs/ca.pem
+    when: inventory_hostname in worker_nodes
+
+  - name: Copy keys from temp_folder to worker nodes 
+    copy:
+      src: /Users/maksimrahalevich/ansible/temp_folder/{{ item }}-key.pem
+      dest: ~/certs/{{ item }}-key.pem
+    loop: "{{ worker_nodes|flatten(levels=1) }}"
+    when: inventory_hostname == item
+
+  - name: Copy kubelet-related keys to necessary directories  
+    vars:
+      worker_certs_and_keys:
+        - "{{ inventory_hostname }}.pem"
+        - "{{ inventory_hostname }}-key.pem"
+        - ca.pem
+    become: yes
+    copy:
+      remote_src: yes
+      src: /home/maksimrahalevich/certs/{{ item }}
+      dest: /var/lib/kubernetes/{{ item }}
+    loop: "{{ worker_certs_and_keys }}"
+    when: inventory_hostname in worker_nodes 
 
 - name: Distribute certs between controller nodes
   fetch:
@@ -130,6 +133,6 @@
 
 - copy:
     src: ~/ansible/temp_folder/{{ item }}
-    dest: ~/certs/{{ item }}.pem
+    dest: ~/certs/{{ item }}
   when: inventory_hostname in groups.tag_controller
-
+  with_items: "{{ controller_certs }}"

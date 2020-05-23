@@ -1,0 +1,17 @@
+- name: Create RBAC for kubelet
+  block:
+  - name: Create ClusterRole and Binding for kubelet authorization
+    template:
+      src: "{{ item.key }}" 
+      dest: "~/{{ item.value }}" 
+    loop: 
+      - { key: 'kubelet_clusterrole.yaml.j2', value: 'kubelet_clusterrole.yaml' }
+      - { key: 'kubelet_binding.yaml.j2', value: 'kubelet_binding.yaml' } 
+  
+  - name: Apply ClusterRole and Binding 
+    shell: cd ~ && kubectl apply --kubeconfig admin.kubeconfig -f "{{ item }}" 
+    loop: 
+      - kubelet_clusterrole.yaml
+      - kubelet_binding.yaml
+  when: inventory_hostname in groups.tag_controller[0]
+  run_once: true

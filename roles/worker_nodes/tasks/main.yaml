@@ -1,0 +1,77 @@
+- name: Bootstrap worker_nodes
+  block:
+
+  - name: Fix locale issue
+    shell: echo -e "LANG=en_US.utf-8\nLC_ALL=en_US.utf-8" >> /etc/environment
+
+  - name: Install necessary packages 
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+        - socat 
+        - conntrack 
+        - ipset
+          
+  - name: Configure cni and containerd
+    template: 
+      src: "{{ item.src }}.j2"
+      dest: "{{ item.dest }}"
+      mode: 0755
+    loop: 
+      - { src: '10-bridge.conf', dest: '/etc/cni/net.d/10-bridge.conf' } 
+      - { src: '99-loopback.conf', dest: '/etc/cni/net.d/99-loopback.conf' }
+      - { src: 'config.toml', dest: '/etc/containerd/' }
+
+  - name: Copy containerd service files 
+    template:
+      src: containerd.service.j2
+      dest: /etc/systemd/system/containerd.service
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Create kubelet configuration 
+    template:
+      src: kubelet-config.yaml.j2
+      dest: /var/lib/kubelet/kubelet-config.yaml 
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Create kubelet systemd service files
+    template: 
+      src: kubelet.service.j2
+      dest: /etc/systemd/system/kubelet.service
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Create kube-proxy configuration 
+    template:
+      src: kube-proxy-config.yaml.j2
+      dest: /var/lib/kube-proxy/kube-proxy-config.yaml
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Create kube-proxy systemd service files 
+    template: 
+      src: kube-proxy.service.j2 
+      dest: /etc/systemd/system/kube-proxy.service 
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Reload kubelet and kube-proxy systemd services
+    systemd:
+      name: "{{ item }}"
+      enabled: yes
+      state: restarted
+      daemon_reload: yes
+    loop:
+      - kubelet
+      - kube-proxy
+
+  become: yes
+  when: inventory_hostname in worker_nodes

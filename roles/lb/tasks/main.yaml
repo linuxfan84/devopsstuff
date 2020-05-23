@@ -1,0 +1,36 @@
+- name: Enabling cluster health checks
+  block:
+  - name: Fix locale issue
+    shell: echo -e "LANG=en_US.utf-8\nLC_ALL=en_US.utf-8" >> /etc/environment
+
+  - name: Disable selinux
+    selinux:
+      state: disabled
+
+  - name: Disable firewalld 
+    systemd:
+      name: firewalld
+      state: stopped 
+      enabled: no
+
+  - name: Reboot hosts
+    reboot:
+
+  - name: Install nginx
+    yum:
+      name: nginx
+      state: latest
+
+  - name: Copy nginx config to controller nodes
+    template:
+      src: nginx.conf.j2 
+      dest: /etc/nginx/nginx.conf 
+      mode: '0644'
+
+  - name: Reload systemd
+    systemd:
+      name: nginx
+      enabled: yes
+      state: restarted
+      daemon_reload: yes
+  become: yes

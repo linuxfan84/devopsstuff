@@ -1,0 +1,4 @@
+vmap cc :norm i#<CR>
+vmap uc :norm ^x<CR>
+
+nnoremap <Esc> :w!

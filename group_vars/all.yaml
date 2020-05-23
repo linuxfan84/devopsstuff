@@ -49,10 +49,11 @@ gcp_zone: "europe-west3-a"
 gcp_project: "noted-sandbox-271617"
 gcp_creds: "~/ansible/creds.json"
 gcp_region: "europe-west3"
-kube_components: [ "kube-controller-manager", "kube-proxy", "kube-scheduler" ]
-kube_hostnames: "kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster,kubernetes.svc.cluster.local"
-worker_certs: [ "ca.pem", "worker-0-key.pem", "worker-1-key.pem", "worker-2-key.pem", "worker-0.pem", "worker-1.pem", "worker-2
-.pem" ]
-controller_certs: [ "ca.pem", "ca-key.pem", "kubernetes-key.pem", "kubernetes.pem", "service-account-key.pem", "service-account.pem" ]
+kube_components: [ "kube-proxy", "kube-controller-manager", "kube-scheduler" ]
+controlplane_components: [ "admin", "kube-controller-manager", "kube-scheduler" ]
+kube_hostnames: "kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster,kubernetes.svc.cluster.local,kubernetes.default.svc.cluster.local"
+worker_certs: [ "ca.pem", "worker-0-key.pem", "worker-1-key.pem", "worker-2-key.pem", "worker-0.pem", "worker-1.pem", "worker-2.pem", "kube-proxy.pem", "kube-proxy-key.pem" ]
+controller_certs: [ "ca.pem", "ca-key.pem", "admin.pem", "admin-key.pem", "kubernetes-key.pem", "kubernetes.pem", "service-account-key.pem", "service-account.pem", "kube-controller-manager.pem", "kube-controller-manager-key.pem", "kube-scheduler.pem", "kube-scheduler-key.pem" ]
 cfssl_templates: [ "ca-config.json", "ca-csr.json", "admin-csr.json", "worker-0-csr.json", "worker-1-csr.json", "worker-2-csr.json", "kube-controller-manager-csr.json", "kube-proxy-csr.json", "kube-scheduler-csr.json", "kubernetes-csr.json", "service-account-csr.json" ]
 home_dir: "/home/maksimrahalevich"
+pod_cidr: "10.200.0.0/24"
