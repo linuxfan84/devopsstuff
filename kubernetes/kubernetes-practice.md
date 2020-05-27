@@ -26,26 +26,30 @@ description: >-
  `gcloud auth login`
 
 Настраиваем дефолтную compute регион и зону:  
- `gcloud config set compute/region europe-west3 gcloud config set compute/zone europe-west3-a`  
+ `gcloud config set compute/region europe-west3   
+gcloud config set compute/zone europe-west3-a`  
  Посмотреть все доступные зоны:  
  `gcloud compute zones list`
 
 Устанавливаем cfssl и cfssljson для OS X:  
- `wget https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/darwin/cfssl wget https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/darwin/cfssljson chmod +x cfssl cfssljson sudo mv cfssl cfssljson /usr/local/bin/`
+ `wget https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/darwin/cfssl wget https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/darwin/cfssljson   
+chmod +x cfssl cfssljson   
+sudo mv cfssl cfssljson /usr/local/bin/`
 
 Устанавливаем kubectl для OS X:  
- `curl -o kubectl https://storage.googleapis.com/kubernetes-release/release/v1.17.0/bin/darwin/amd64/kubectl chmod +x kubectl sudo mv kubectl /usr/local/bin/`
+ `curl -o kubectl https://storage.googleapis.com/kubernetes-release/release/v1.17.0/bin/darwin/amd64/kubectl   
+chmod +x kubectl sudo mv kubectl /usr/local/bin/`
 
 Создаем виртуальную частную сеть \(VPC\):  
  `--subnet-mode custom` - означает что мы создаем VPC без подсетей с предопределенными IP адрессами.  
  `--range` - говорит о том какой именно диапазон IP адрессов мы хотим выделить нашей подсети.  
  `--source-ranges` - говорит о том что мы позволяем весь траффик по протоколам и портам указанным в `--allow` с диапазона этих IP адрессов.
 
-\`gcloud compute networks create kubernetes-the-hard-way --subnet-mode custom
+`gcloud compute networks create kubernetes-the-hard-way --subnet-mode custom`
 
-gcloud compute networks subnets create kubernetes --network kubernetes-the-hard-way --range 10.240.0.0/24
+`gcloud compute networks subnets create kubernetes --network kubernetes-the-hard-way --range 10.240.0.0/24`
 
-gcloud compute firewall-rules create kubernetes-the-hard-way-allow-internal --allow tcp,udp,icmp --network kubernetes-the-hard-way --source-ranges 10.240.0.0/24,10.200.0.0/16\`
+`gcloud compute firewall-rules create kubernetes-the-hard-way-allow-internal --allow tcp,udp,icmp --network kubernetes-the-hard-way --source-ranges 10.240.0.0/24,10.200.0.0/16`
 
 `gcloud compute firewall-rules create kubernetes-the-hard-way-allow-external --allow tcp:22,tcp:6443,icmp --network kubernetes-the-hard-way --source-ranges 0.0.0.0/0`
 
@@ -483,8 +487,7 @@ kubectl config use-context default --kubeconfig=admin.kubeconfig
  `for instance in worker-0 worker-1 worker-2;`  
  `do gcloud compute scp ${instance}.kubeconfig kube-proxy.kubeconfig ${instance}:~/ done`  
  Распределим `admin` ,`kube-controller-manager` и `kube-scheduler` конфиги по контроллер нодам:  
- `for instance in controller-0 controller-1 controller-2;`  
- `do gcloud compute scp admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig ${instance}:~/ done`
+ `for instance in controller-0 controller-1 controller2;do gcloud compute scp admin.kubeconfig kube-controller-manager.kubeconfig kube-scheduler.kubeconfig ${instance}:~/ done`
 
 Создадим Encryption config and key:  
  Создадим ключ:  
@@ -1123,14 +1126,18 @@ curl -I http://${EXTERNAL_IP}:${NODE_PORT}
  `gcloud -q compute instances delete controller-0 controller-1 controller-2 worker-0 worker-1 worker-2 --zone $(gcloud config get-value compute/zone)`
 
 Удаление сетевых ресурсов балансировщика:  
- `gcloud -q compute forwarding-rules delete kubernetes-forwarding-rule --region $(gcloud config get-value compute/region) gcloud -q compute target-pools delete kubernetes-target-pool gcloud -q compute http-health-checks delete kubernetes gcloud -q compute addresses delete kubernetes-the-hard-way`
+ `gcloud -q compute forwarding-rules delete kubernetes-forwarding-rule --region $(gcloud config get-value compute/region)`   
+`gcloud -q compute target-pools delete kubernetes-target-pool   
+gcloud -q compute http-health-checks delete kubernetes   
+gcloud -q compute addresses delete kubernetes-the-hard-way`
 
 Удаление правил фаерволла:  
  `gcloud -q compute firewall-rules delete kubernetes-the-hard-way-allow-nginx-service kubernetes-the-hard-way-allow-internal kubernetes-the-hard-way-allow-external kubernetes-the-hard-way-allow-health-check`
 
 Удаление VPC:  
  `gcloud -q compute routes delete kubernetes-route-10-200-0-0-24 kubernetes-route-10-200-1-0-24 kubernetes-route-10-200-2-0-24`  
- `gcloud -q compute networks subnets delete kubernetes gcloud -q compute networks delete kubernetes-the-hard-way`
+ `gcloud -q compute networks subnets delete kubernetes`   
+`gcloud -q compute networks delete kubernetes-the-hard-way`
 
 ### 2. Сделать скрипт \(python/bash\) который резервирует и удаляет инфраструктуру выше. Инструменты - terraform, ansible.
 
